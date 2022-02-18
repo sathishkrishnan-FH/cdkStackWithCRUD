@@ -1,6 +1,6 @@
-const { DynamoDB } = require('aws-sdk');
+import { DynamoDB } from 'aws-sdk';
 
-exports.handler = async function(event) {
+export const handler = async (event: any) => {
     console.log('-- user update -- ', event);
     const docClient = new DynamoDB.DocumentClient();
     if(!event.body) {
@@ -13,21 +13,22 @@ exports.handler = async function(event) {
     }
 
     const data = JSON.parse(event.body);
-    const params = {
+    const userPrimaryKey: string = process.env.USER_PRIMARY_KEY || '';
+    let params : any = {
         TableName: process.env.USER_TABLENAME,
         Key: {
-            'userid': editUserId,
+            [userPrimaryKey]: parseInt(editUserId),
         },
-        // Update the "description" column with the one passed in
-        UpdateExpression: "SET description = :description",
+
+        UpdateExpression: "SET firstname = :firstname, lastname = :lastname, address = :address",
         ExpressionAttributeValues: {
-            ":description": data.description || '',
-        },
-        ReturnValues: "ALL_NEW",
+            ":firstname": data.firstname || '',
+            ":lastname": data.lastname || '',
+            ":address": data.address || '',
+        }
     };
     try {
-        const result = await docClient.update(params).promise();
-        console.log('result', result);
+        await docClient.update(params).promise();
         return {
             statusCode: 204,
             body: JSON.stringify({msg: 'user details updated successfully'}),

@@ -1,10 +1,10 @@
-const { DynamoDB } = require('aws-sdk');
+import { DynamoDB } from 'aws-sdk';
 
-exports.handler = async function(event) {
+export const handler = async (event: any) => {
     console.log('-- user readAll -- ', event);
     // need to do Some pagination 
     const docClient = new DynamoDB.DocumentClient();
-    const params = {
+    const params: any = {
         TableName: process.env.USER_TABLENAME,
     };
 
@@ -22,4 +22,4 @@ exports.handler = async function(event) {
             body:JSON.stringify({msg:'unable to read users data'})
         }
     }
-};
+}

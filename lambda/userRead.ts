@@ -1,20 +1,22 @@
-const { DynamoDB } = require('aws-sdk');
+import { DynamoDB } from 'aws-sdk';
 
-exports.handler = async function(event) {
+export const handler = async (event: any) => {
     const docClient = new DynamoDB.DocumentClient();
     console.log('-- user read -- ', event);
-    try {
-        let requestUserId = event.pathParameters.id;
-        if (!requestUserId) {
-            return {statusCode: 400, body: 'Error Invalid Path parameter'};
-        }
 
-        const params = {
-            TableName: process.env.USER_TABLENAME,
-            Key: {
-                'userid': requestUserId
-            }
-        };
+    let requestUserId = event.pathParameters.id;
+    if (!requestUserId) {
+        return {statusCode: 400, body: 'Error Invalid Path parameter'};
+    }
+
+    const userPrimaryKey: string = process.env.USER_PRIMARY_KEY || '';
+    const params: any = {
+        TableName: process.env.USER_TABLENAME,
+        Key: {
+            [userPrimaryKey]: parseInt(requestUserId)
+        }
+    };
+    try {
         const result = await docClient.get(params).promise();
         let responseObj = {};
         if (result.Item) {
@@ -24,7 +26,7 @@ exports.handler = async function(event) {
             };
         }
         else {
-            responseObj = {statusCode: 404};
+            responseObj = {statusCode: 404, body: JSON.stringify({msg: 'user not Found'})};
         }
 
         return responseObj;
@@ -35,4 +37,4 @@ exports.handler = async function(event) {
             body: JSON.stringify({msg:'unable to read user data'})
         };
     }
-};
+}

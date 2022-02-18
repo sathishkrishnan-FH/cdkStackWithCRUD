@@ -31,16 +31,11 @@ export class SathishkWorkshopStack extends cdk.Stack {
     super(scope, id, props);
     // this.sampleHitCounterAndHello();
     this.userCRUD();
-    // create lambda for create delete put getAll getList
-    // create dynamoDb 
-    // create API gateway REST API 
    }
 
    userCRUD() {
      const user = new User(this, 'sathishkUserCRUD');
-     const userApi = new apigw.LambdaRestApi(this, 'sathishkUser', {
-       handler: user.readAllHandler,
-       proxy: false
+     const userApi = new apigw.RestApi(this, 'sathishkUser', {
      });
 
      const createIntegration = new apigw.LambdaIntegration(user.createHandler);
@@ -49,14 +44,14 @@ export class SathishkWorkshopStack extends cdk.Stack {
      const updateIntegration = new apigw.LambdaIntegration(user.updateHandler);
      const deleteIntegration = new apigw.LambdaIntegration(user.deleteHandler);
 
-     const userResource = userApi.root.addResource('users');
-     userResource.addMethod('GET', readAllIntegration);
-     userResource.addMethod('POST', createIntegration);
+     const users = userApi.root.addResource('users');
+     users.addMethod('GET', readAllIntegration);
+     users.addMethod('POST', createIntegration);
    
-    const particularResourse = userResource.addResource('{id}');
-    particularResourse.addMethod('GET', readIntegration);
-    particularResourse.addMethod('PATCH', updateIntegration);
-    particularResourse.addMethod('DELETE', deleteIntegration);
+    const singleUser = users.addResource('{id}');
+    singleUser.addMethod('GET', readIntegration);
+    singleUser.addMethod('PATCH', updateIntegration);
+    singleUser.addMethod('DELETE', deleteIntegration);
 
     }
   
@@ -81,6 +76,4 @@ export class SathishkWorkshopStack extends cdk.Stack {
       table: helloWithCounter.table
     });
   }
-
-
 }

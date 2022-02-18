@@ -3,6 +3,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 
 const USER_TABLE_NAME = 'users';
+const PRIMARY_KEY = 'userid';
 
 export class User extends Construct {
     public readonly createHandler: lambda.Function;
@@ -14,27 +15,27 @@ export class User extends Construct {
     constructor(scope: Construct, id: string, props?: any) {
         super(scope, id);
 
-        console.log('beforeTableCreate');
         const userTable = new dynamodb.Table(this, USER_TABLE_NAME, {
-            partitionKey: {name: 'userid', type: dynamodb.AttributeType.NUMBER}
+            partitionKey: {name: PRIMARY_KEY, type: dynamodb.AttributeType.NUMBER}
         });
-        console.log('afterTableCreate');
-        console.log('beforeCreateLambda');
+
         this.createHandler = new lambda.Function(this, 'userCreate', {
             runtime: lambda.Runtime.NODEJS_14_X,
             code: lambda.Code.fromAsset('lambda'),
             handler: 'userCreate.handler',
             environment: {
-                USER_TABLENAME: userTable.tableName
+                USER_TABLENAME: userTable.tableName,
+                USER_PRIMARY_KEY: PRIMARY_KEY
             }
         });
-        console.log('afterCreateLambda');
+
         this.readHandler = new lambda.Function(this, 'userRead', {
             runtime: lambda.Runtime.NODEJS_14_X,
             code: lambda.Code.fromAsset('lambda'),
             handler: 'userRead.handler',
             environment: {
-                USER_TABLENAME: userTable.tableName
+                USER_TABLENAME: userTable.tableName,
+                USER_PRIMARY_KEY: PRIMARY_KEY
             }
         });
 
@@ -43,7 +44,8 @@ export class User extends Construct {
             code: lambda.Code.fromAsset('lambda'),
             handler: 'userReadAll.handler',
             environment: {
-                USER_TABLENAME: userTable.tableName
+                USER_TABLENAME: userTable.tableName,
+                USER_PRIMARY_KEY: PRIMARY_KEY
             }
         });
 
@@ -52,7 +54,8 @@ export class User extends Construct {
             code: lambda.Code.fromAsset('lambda'),
             handler: 'userUpdate.handler',
             environment: {
-                USER_TABLENAME: userTable.tableName
+                USER_TABLENAME: userTable.tableName,
+                USER_PRIMARY_KEY: PRIMARY_KEY
             }
         });
 
@@ -61,7 +64,8 @@ export class User extends Construct {
             code: lambda.Code.fromAsset('lambda'),
             handler: 'userDelete.handler',
             environment: {
-                USER_TABLENAME: userTable.tableName
+                USER_TABLENAME: userTable.tableName,
+                USER_PRIMARY_KEY: PRIMARY_KEY
             }
         });
 
